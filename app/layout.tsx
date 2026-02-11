@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full antialiased font-secondary">
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

@@ -3,6 +3,11 @@
 import React, { useEffect, useState } from "react";
 import type { BlockchainVerification } from "@/lib/types";
 
+interface VerificationResponse extends BlockchainVerification {
+  network?: string;
+  explorerUrl?: string | null;
+}
+
 interface Props {
   badgeId: string;
   txHash: string | null;
@@ -17,7 +22,7 @@ export function BlockchainBadge({
   blockNumber,
 }: Props) {
   const [verification, setVerification] =
-    useState<BlockchainVerification | null>(null);
+    useState<VerificationResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -115,6 +120,8 @@ export function BlockchainBadge({
   const displayTxHash = txHash || verification.txHash;
   const displayBlock = blockNumber || verification.blockNumber;
   const displayContract = contractAddress || verification.contractAddress;
+  const explorerUrl = verification.explorerUrl;
+  const networkLabel = verification.network === "sepolia" ? "Sepolia Testnet" : "Localhost";
 
   return (
     <div className="mt-8 space-y-3">
@@ -127,7 +134,7 @@ export function BlockchainBadge({
             Blockchain Verified
           </p>
           <p className="text-[13px] font-secondary text-[var(--color-success-foreground)]">
-            Badge data matches the on-chain record. Integrity confirmed.
+            Badge data matches the on-chain record. Integrity confirmed. ({networkLabel})
           </p>
         </div>
       </div>
@@ -142,9 +149,20 @@ export function BlockchainBadge({
               <span className="text-[12px] font-secondary text-[var(--muted-foreground)]">
                 Tx Hash
               </span>
-              <code className="text-[12px] font-primary text-[var(--foreground)]">
-                {displayTxHash.slice(0, 10)}...{displayTxHash.slice(-8)}
-              </code>
+              {explorerUrl ? (
+                <a
+                  href={`${explorerUrl}/tx/${displayTxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[12px] font-primary text-[var(--primary)] hover:underline"
+                >
+                  {displayTxHash.slice(0, 10)}...{displayTxHash.slice(-8)}
+                </a>
+              ) : (
+                <code className="text-[12px] font-primary text-[var(--foreground)]">
+                  {displayTxHash.slice(0, 10)}...{displayTxHash.slice(-8)}
+                </code>
+              )}
             </div>
           )}
           {displayBlock && (

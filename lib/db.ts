@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
+import bcrypt from "bcryptjs";
 
 const DB_DIR = path.join(process.cwd(), "data");
 const DB_PATH = path.join(DB_DIR, "badgeflow.db");
@@ -16,6 +17,15 @@ function initDb(): Database.Database {
   db.pragma("journal_mode = WAL");
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'user',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS missions (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -69,6 +79,12 @@ function initDb(): Database.Database {
   insert.run("mission-1", "책 10권 읽기", "10권의 책을 읽고 독서 마스터 뱃지를 획득하세요", "menu_book", "Reading Master", "#E8F5E9", "menu_book", "책읽기 활동", "BadgeFlow Education", "10권의 책을 읽고 독후감을 제출하면 인증됩니다", now);
   insert.run("mission-2", "학습 1주일 완료", "1주일 연속 학습을 완료하고 학습 챔피언 뱃지를 획득하세요", "school", "Learning Champion", "#E3F2FD", "school", "학습 활동", "BadgeFlow Academy", "7일 연속 학습 기록이 확인되면 인증됩니다", now);
   insert.run("mission-3", "한자검정시험 통과", "한자검정시험에 합격하고 한자 마스터 뱃지를 획득하세요", "translate", "Hanja Master", "#FFF3E0", "translate", "시험 인증", "한자검정시험위원회", "한자검정시험 합격증을 제출하면 인증됩니다", now);
+
+  // Seed default admin user
+  const hashedPassword = bcrypt.hashSync("admin1234", 10);
+  db.prepare(
+    "INSERT OR IGNORE INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)"
+  ).run("admin-1", "Admin User", "admin@badgeflow.com", hashedPassword, "admin");
 
   (globalThis as Record<string, unknown>).__db = db;
   return db;

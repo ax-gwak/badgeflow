@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 
 type ActiveItem = "dashboard" | "badges" | "issuance" | "analytics" | "settings";
@@ -13,25 +15,39 @@ interface NavItem {
   key: ActiveItem;
   label: string;
   icon: string;
+  href: string;
 }
 
 const mainItems: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "dashboard" },
-  { key: "badges", label: "Badge Management", icon: "verified" },
-  { key: "issuance", label: "Issuance", icon: "send" },
+  { key: "dashboard", label: "Dashboard", icon: "dashboard", href: "/dashboard" },
+  { key: "badges", label: "Badge Management", icon: "verified", href: "/badges" },
+  { key: "issuance", label: "Issuance", icon: "send", href: "/test" },
 ];
 
 const insightItems: NavItem[] = [
-  { key: "analytics", label: "Analytics", icon: "bar_chart" },
-  { key: "settings", label: "Settings", icon: "settings" },
+  { key: "analytics", label: "Analytics", icon: "bar_chart", href: "/dashboard" },
+  { key: "settings", label: "Settings", icon: "settings", href: "/dashboard" },
 ];
 
 export function Sidebar({ activeItem }: SidebarProps) {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const userName = session?.user?.name ?? "Admin User";
+  const userEmail = session?.user?.email ?? "admin@badgeflow.com";
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   const renderItem = (item: NavItem) => {
     const isActive = activeItem === item.key;
     return (
       <div
         key={item.key}
+        onClick={() => router.push(item.href)}
         className={`flex items-center gap-3 text-[14px] font-secondary cursor-pointer mx-3 px-3 py-2 rounded-[999px] transition ${
           isActive
             ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)]"
@@ -48,7 +64,10 @@ export function Sidebar({ activeItem }: SidebarProps) {
     <aside className="w-[280px] h-full bg-[var(--sidebar)] border-r border-[var(--sidebar-border)] flex flex-col justify-between shrink-0">
       <div>
         <div className="px-6 py-6">
-          <span className="text-[var(--primary)] font-primary text-[18px] font-bold">
+          <span
+            className="text-[var(--primary)] font-primary text-[18px] font-bold cursor-pointer"
+            onClick={() => router.push("/")}
+          >
             BADGEFLOW
           </span>
         </div>
@@ -69,15 +88,24 @@ export function Sidebar({ activeItem }: SidebarProps) {
       </div>
 
       <div className="px-6 py-4 border-t border-[var(--sidebar-border)] flex items-center gap-3">
-        <Avatar initials="AU" size="sm" />
-        <div className="flex flex-col">
+        <Avatar initials={initials} size="sm" />
+        <div className="flex flex-col flex-1">
           <span className="text-[14px] font-secondary font-medium text-[var(--sidebar-accent-foreground)]">
-            Admin User
+            {userName}
           </span>
           <span className="text-[12px] font-secondary text-[var(--sidebar-foreground)]">
-            admin@badgeflow.com
+            {userEmail}
           </span>
         </div>
+        {session && (
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="material-icons text-[18px] text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-accent-foreground)] cursor-pointer transition-colors"
+            title="Sign out"
+          >
+            logout
+          </button>
+        )}
       </div>
     </aside>
   );

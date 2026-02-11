@@ -13,11 +13,11 @@ const BADGE_REGISTRY_ABI = [
 const HARDHAT_ACCOUNT_0_KEY =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
-const RPC_URL = "http://127.0.0.1:8545";
-
 interface DeploymentInfo {
   address: string;
   network: string;
+  rpcUrl?: string;
+  chainId?: number;
   deployedAt: string;
 }
 
@@ -31,12 +31,31 @@ function getDeploymentInfo(): DeploymentInfo | null {
   }
 }
 
+function getRpcUrl(): string {
+  const deployment = getDeploymentInfo();
+  if (deployment?.rpcUrl) return deployment.rpcUrl;
+  if (deployment?.network === "sepolia") {
+    return process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org";
+  }
+  return "http://127.0.0.1:8545";
+}
+
+function getPrivateKey(): string {
+  const deployment = getDeploymentInfo();
+  if (deployment?.network === "sepolia") {
+    return process.env.DEPLOYER_PRIVATE_KEY || "";
+  }
+  return HARDHAT_ACCOUNT_0_KEY;
+}
+
 function getProvider(): ethers.JsonRpcProvider {
-  return new ethers.JsonRpcProvider(RPC_URL);
+  return new ethers.JsonRpcProvider(getRpcUrl());
 }
 
 function getSigner(): ethers.Wallet {
-  return new ethers.Wallet(HARDHAT_ACCOUNT_0_KEY, getProvider());
+  const key = getPrivateKey();
+  if (!key) throw new Error("No private key available for signing");
+  return new ethers.Wallet(key, getProvider());
 }
 
 function getContract(
@@ -74,6 +93,23 @@ export async function isBlockchainAvailable(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export function getNetworkInfo(): { network: string; chainId: number; explorerUrl: string | null } {
+  const deployment = getDeploymentInfo();
+  if (!deployment) return { network: "unknown", chainId: 0, explorerUrl: null };
+  if (deployment.network === "sepolia") {
+    return {
+      network: "sepolia",
+      chainId: 11155111,
+      explorerUrl: "https://sepolia.etherscan.io",
+    };
+  }
+  return {
+    network: "localhost",
+    chainId: 31337,
+    explorerUrl: null,
+  };
 }
 
 export async function registerBadgeOnChain(badge: {

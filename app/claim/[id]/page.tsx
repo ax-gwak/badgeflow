@@ -1,11 +1,42 @@
-"use client";
-
-import React from "react";
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
 import { PublicHeader } from "@/components/layout/PublicHeader";
-import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
+import { ClaimActions } from "@/components/ui/ClaimActions";
+import type { EarnedBadge } from "@/lib/types";
 
-export default function BadgeClaimPage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const badge = db
+    .prepare("SELECT * FROM earned_badges WHERE id = ?")
+    .get(id) as EarnedBadge | undefined;
+  if (!badge) return {};
+  return {
+    title: `Claim: ${badge.badge_name} - BadgeFlow`,
+    description: `Claim your ${badge.badge_name} badge earned through ${badge.category}.`,
+  };
+}
+
+export default async function BadgeClaimPage({ params }: PageProps) {
+  const { id } = await params;
+  const badge = db
+    .prepare("SELECT * FROM earned_badges WHERE id = ?")
+    .get(id) as EarnedBadge | undefined;
+
+  if (!badge) notFound();
+
+  const earnedDate = new Date(badge.earned_at).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const credentialId = badge.id.slice(0, 8).toUpperCase();
+
   return (
     <div className="flex flex-col h-full">
       <PublicHeader />
@@ -14,17 +45,20 @@ export default function BadgeClaimPage() {
         <div className="flex gap-12 max-w-[900px] w-full">
           {/* Left Column - Badge Image */}
           <div className="w-[280px] shrink-0 flex flex-col items-center">
-            <div className="w-[240px] h-[240px] bg-gradient-to-br from-[#FFC107] to-[#FF8400] rounded-[24px] flex items-center justify-center">
-              <span className="material-icons text-[80px] text-white/80">
-                menu_book
+            <div
+              className="w-[240px] h-[240px] rounded-[24px] flex items-center justify-center"
+              style={{ backgroundColor: badge.badge_color }}
+            >
+              <span className="material-icons text-[80px] text-black/20">
+                {badge.badge_icon}
               </span>
             </div>
             <div className="mt-3 text-center">
-              <p className="text-[14px] font-primary font-bold text-[var(--foreground)] tracking-wider">
-                LEVEL 3
+              <p className="text-[14px] font-primary font-bold text-[var(--foreground)] tracking-wider uppercase">
+                {badge.category}
               </p>
               <p className="text-[13px] text-[var(--muted-foreground)] font-secondary mt-1">
-                Issued by BadgeFlow Education
+                Issued by BadgeFlow
               </p>
             </div>
           </div>
@@ -32,32 +66,42 @@ export default function BadgeClaimPage() {
           {/* Right Column - Badge Details */}
           <div className="flex-1 flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="material-icons text-[var(--color-success-foreground)] text-[18px]">
-                verified
-              </span>
-              <span className="text-[13px] font-secondary text-[var(--color-success-foreground)]">
-                Verified Issuer
-              </span>
+              {badge.tx_hash ? (
+                <>
+                  <span className="material-icons text-[var(--color-success-foreground)] text-[18px]">
+                    verified
+                  </span>
+                  <span className="text-[13px] font-secondary text-[var(--color-success-foreground)]">
+                    Blockchain Verified
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="material-icons text-[var(--muted-foreground)] text-[18px]">
+                    verified
+                  </span>
+                  <span className="text-[13px] font-secondary text-[var(--muted-foreground)]">
+                    Verified Issuer
+                  </span>
+                </>
+              )}
             </div>
 
             <h1 className="text-[28px] font-primary font-bold mt-2">
-              Reading Level 3 Complete
+              {badge.badge_name}
             </h1>
 
             <p className="text-[14px] text-[var(--muted-foreground)] font-secondary leading-relaxed mt-3">
-              This badge confirms that the recipient has successfully completed
-              Reading Level 3, demonstrating strong comprehension and analytical
-              reading skills across 30+ books.
+              This digital badge confirms the holder&apos;s achievement in the{" "}
+              {badge.category} category. Earned through completing the required
+              mission on the BadgeFlow platform.
             </p>
 
-            {/* Skills */}
+            {/* Category */}
             <div className="mt-6">
-              <h3 className="text-[14px] font-primary font-bold">Skills</h3>
+              <h3 className="text-[14px] font-primary font-bold">Category</h3>
               <div className="flex flex-wrap gap-2 mt-2">
-                <Label variant="secondary">Reading</Label>
-                <Label variant="secondary">Comprehension</Label>
-                <Label variant="secondary">Critical Thinking</Label>
-                <Label variant="secondary">Literature</Label>
+                <Label variant="secondary">{badge.category}</Label>
               </div>
             </div>
 
@@ -65,18 +109,10 @@ export default function BadgeClaimPage() {
             <div className="flex gap-8 mt-6">
               <div>
                 <p className="text-[12px] text-[var(--muted-foreground)] font-secondary">
-                  Issue Date
+                  Earned Date
                 </p>
                 <p className="text-[14px] font-primary font-medium mt-1">
-                  Feb 6, 2026
-                </p>
-              </div>
-              <div>
-                <p className="text-[12px] text-[var(--muted-foreground)] font-secondary">
-                  Expiry
-                </p>
-                <p className="text-[14px] font-primary font-medium mt-1">
-                  Feb 6, 2027
+                  {earnedDate}
                 </p>
               </div>
               <div>
@@ -84,19 +120,21 @@ export default function BadgeClaimPage() {
                   Credential ID
                 </p>
                 <p className="text-[14px] font-primary font-medium mt-1">
-                  BF-2026-0347
+                  {credentialId}
+                </p>
+              </div>
+              <div>
+                <p className="text-[12px] text-[var(--muted-foreground)] font-secondary">
+                  Issuer
+                </p>
+                <p className="text-[14px] font-primary font-medium mt-1">
+                  BadgeFlow
                 </p>
               </div>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex items-center gap-3 mt-8">
-              <Button variant="default" size="large">
-                Claim This Badge
-              </Button>
-              <Button variant="outline">Share</Button>
-              <Button variant="outline">Verify</Button>
-            </div>
+            <ClaimActions badgeId={badge.id} />
           </div>
         </div>
       </div>

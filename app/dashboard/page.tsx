@@ -1,14 +1,44 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RecentTable } from "@/components/dashboard/RecentTable";
 import { Button } from "@/components/ui/Button";
-import { Select } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
-import { dashboardMetrics, recentIssuances } from "@/lib/mock-data";
+
+interface DashboardData {
+  metrics: { title: string; value: string; change: string; icon: string }[];
+  recentIssuances: {
+    badge: string;
+    recipient: string;
+    email: string;
+    status: "claimed" | "pending" | "expired";
+    date: string;
+  }[];
+}
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((d) => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const metrics = data?.metrics ?? [
+    { title: "Total Issued", value: "—", change: "", icon: "badge" },
+    { title: "Claim Rate", value: "—", change: "", icon: "trending_up" },
+    { title: "Active Badges", value: "—", change: "", icon: "verified" },
+    { title: "On-Chain Verified", value: "—", change: "", icon: "share" },
+  ];
+
   return (
     <AdminLayout activeItem="dashboard">
       <div className="p-8">
@@ -21,17 +51,18 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Select
-              placeholder="Last 30 Days"
-              options={["Last 30 Days", "Last 7 Days", "Last 90 Days", "This Year"]}
-            />
-            <Button variant="default">+ New Badge</Button>
+            <Button
+              variant="default"
+              onClick={() => router.push("/badges/create")}
+            >
+              + New Badge
+            </Button>
           </div>
         </div>
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-4 gap-4 mt-6">
-          {dashboardMetrics.map((metric) => (
+          {metrics.map((metric) => (
             <MetricCard
               key={metric.title}
               title={metric.title}
@@ -50,11 +81,38 @@ export default function DashboardPage() {
                 <span className="text-[18px] font-primary font-bold">
                   Recent Issuances
                 </span>
-                <Button variant="outline">View All</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/badges")}
+                >
+                  View All
+                </Button>
               </div>
             }
           >
-            <RecentTable data={recentIssuances} />
+            {loading ? (
+              <div className="flex items-center justify-center h-[120px] text-[var(--muted-foreground)] font-secondary text-[14px]">
+                Loading...
+              </div>
+            ) : data?.recentIssuances.length ? (
+              <RecentTable data={data.recentIssuances} />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-[120px] gap-2">
+                <span className="material-icons text-[var(--muted-foreground)] text-[32px]">
+                  inbox
+                </span>
+                <p className="text-[14px] text-[var(--muted-foreground)] font-secondary">
+                  No badges issued yet. Complete a mission on the{" "}
+                  <span
+                    className="text-[var(--primary)] cursor-pointer"
+                    onClick={() => router.push("/test")}
+                  >
+                    test page
+                  </span>
+                  .
+                </p>
+              </div>
+            )}
           </Card>
         </div>
       </div>

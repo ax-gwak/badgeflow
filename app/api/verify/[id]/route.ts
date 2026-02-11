@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyBadgeOnChain } from "@/lib/blockchain";
+import { verifyBadgeOnChain, getNetworkInfo } from "@/lib/blockchain";
 import type { EarnedBadge, BlockchainVerification } from "@/lib/types";
 
 export async function GET(
@@ -37,5 +37,7 @@ export async function GET(
     message: result.message,
   };
 
-  return NextResponse.json(verification);
+  const networkInfo = getNetworkInfo();
+
+  return NextResponse.json({ ...verification, ...networkInfo });
 }
