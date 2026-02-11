@@ -9,6 +9,7 @@ type ActiveItem = "dashboard" | "badges" | "issuance" | "analytics" | "settings"
 
 interface SidebarProps {
   activeItem: ActiveItem;
+  onClose?: () => void;
 }
 
 interface NavItem {
@@ -25,11 +26,11 @@ const mainItems: NavItem[] = [
 ];
 
 const insightItems: NavItem[] = [
-  { key: "analytics", label: "Analytics", icon: "bar_chart", href: "/dashboard" },
-  { key: "settings", label: "Settings", icon: "settings", href: "/dashboard" },
+  { key: "analytics", label: "Analytics", icon: "bar_chart", href: "/analytics" },
+  { key: "settings", label: "Settings", icon: "settings", href: "/settings" },
 ];
 
-export function Sidebar({ activeItem }: SidebarProps) {
+export function Sidebar({ activeItem, onClose }: SidebarProps) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -47,7 +48,7 @@ export function Sidebar({ activeItem }: SidebarProps) {
     return (
       <div
         key={item.key}
-        onClick={() => router.push(item.href)}
+        onClick={() => { router.push(item.href); onClose?.(); }}
         className={`flex items-center gap-3 text-[14px] font-secondary cursor-pointer mx-3 px-3 py-2 rounded-[999px] transition ${
           isActive
             ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)]"

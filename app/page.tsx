@@ -57,12 +57,12 @@ const publicPages = [
     tags: ["DB", "Dynamic"],
   },
   {
-    href: "/profile/test-user",
+    href: "/profile/{user-id}",
     title: "Profile",
     description:
-      "사용자 프로필 — 실제 DB 기반. 획득 뱃지 그리드 + 통계(Badges/Verified/Skills) + 카테고리별 스킬 레벨.",
+      "사용자 프로필 — DB 기반 멀티유저. 획득 뱃지 그리드 + 통계(Badges/Verified/Skills) + 카테고리별 스킬 레벨. 로그인 후 헤더에서 접근.",
     icon: "person",
-    tags: ["DB", "SSR"],
+    tags: ["DB", "SSR", "Auth"],
   },
 ];
 

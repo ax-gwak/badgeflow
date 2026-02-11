@@ -61,7 +61,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {metrics.map((metric) => (
             <MetricCard
               key={metric.title}

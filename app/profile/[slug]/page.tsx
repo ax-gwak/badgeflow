@@ -1,8 +1,20 @@
 import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Avatar } from "@/components/ui/Avatar";
 import { Label } from "@/components/ui/Label";
 import type { EarnedBadge } from "@/lib/types";
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+interface DbUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 const skillLevelVariant: Record<string, "success" | "violet" | "orange"> = {
   Advanced: "success",
@@ -16,17 +28,24 @@ function getSkillLevel(count: number): string {
   return "Beginner";
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ params }: PageProps) {
+  const { slug } = await params;
+
+  const user = db
+    .prepare("SELECT id, name, email, role FROM users WHERE id = ?")
+    .get(slug) as DbUser | undefined;
+
+  if (!user) notFound();
+
   const badges = db
     .prepare(
       "SELECT * FROM earned_badges WHERE user_id = ? ORDER BY earned_at DESC"
     )
-    .all("test-user") as EarnedBadge[];
+    .all(user.id) as EarnedBadge[];
 
   const totalBadges = badges.length;
   const onChainCount = badges.filter((b) => b.tx_hash).length;
 
-  // Derive skills from badge categories
   const categoryCount: Record<string, number> = {};
   for (const badge of badges) {
     categoryCount[badge.category] = (categoryCount[badge.category] || 0) + 1;
@@ -41,6 +60,13 @@ export default async function ProfilePage() {
       );
     });
 
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <div className="flex flex-col h-full">
       <PublicHeader />
@@ -48,17 +74,18 @@ export default async function ProfilePage() {
       <div className="flex-1 overflow-auto">
         {/* Hero Section */}
         <div className="py-8 px-8 border-b border-[var(--border)]">
-          <div className="max-w-[1000px] mx-auto flex items-center gap-6">
-            <Avatar initials="TU" size="lg" />
+          <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center gap-6">
+            <Avatar initials={initials} size="lg" />
 
             <div className="flex-1">
-              <h1 className="text-[24px] font-primary font-bold">Test User</h1>
+              <h1 className="text-[24px] font-primary font-bold">
+                {user.name}
+              </h1>
               <p className="text-[14px] text-[var(--muted-foreground)] font-secondary">
-                BadgeFlow Learning Center
+                {user.email}
               </p>
               <p className="text-[14px] text-[var(--muted-foreground)] font-secondary mt-1">
-                Pursuing excellence in digital learning and earning verified
-                badges through the BadgeFlow platform.
+                Earning verified badges through the BadgeFlow platform.
               </p>
             </div>
 
@@ -93,7 +120,7 @@ export default async function ProfilePage() {
 
         {/* Main Content */}
         <div className="py-8 px-8">
-          <div className="max-w-[1000px] mx-auto flex gap-8">
+          <div className="max-w-[1000px] mx-auto flex flex-col lg:flex-row gap-8">
             {/* Left - Badge Grid */}
             <div className="flex-1">
               <h2 className="text-[18px] font-primary font-bold">
@@ -109,7 +136,7 @@ export default async function ProfilePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                   {badges.map((badge) => (
                     <a
                       key={badge.id}
@@ -146,7 +173,7 @@ export default async function ProfilePage() {
             </div>
 
             {/* Right - Skills */}
-            <div className="w-[280px] shrink-0">
+            <div className="w-full lg:w-[280px] shrink-0">
               <h2 className="text-[18px] font-primary font-bold">
                 Top Skills
               </h2>

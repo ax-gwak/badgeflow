@@ -15,6 +15,16 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title: `${badge.badge_name} - BadgeFlow`,
     description: `Digital badge earned for ${badge.category}. Issued by BadgeFlow.`,
+    openGraph: {
+      title: `${badge.badge_name} - BadgeFlow`,
+      description: `Verified digital badge for ${badge.category}. Earned on BadgeFlow.`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${badge.badge_name} - BadgeFlow`,
+      description: `Verified digital badge for ${badge.category}. Earned on BadgeFlow.`,
+    },
   };
 }
 
@@ -34,9 +44,9 @@ export default async function SharePage({ params }: PageProps) {
       <PublicHeader />
 
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="flex gap-12 max-w-[900px] w-full">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-[900px] w-full">
           {/* Left Column - Badge Visual */}
-          <div className="w-[280px] shrink-0 flex flex-col items-center">
+          <div className="w-full md:w-[280px] shrink-0 flex flex-col items-center">
             <div
               className="w-[240px] h-[240px] rounded-[24px] flex items-center justify-center"
               style={{ backgroundColor: badge.badge_color }}

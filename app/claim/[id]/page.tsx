@@ -42,9 +42,9 @@ export default async function BadgeClaimPage({ params }: PageProps) {
       <PublicHeader />
 
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="flex gap-12 max-w-[900px] w-full">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-[900px] w-full">
           {/* Left Column - Badge Image */}
-          <div className="w-[280px] shrink-0 flex flex-col items-center">
+          <div className="w-full md:w-[280px] shrink-0 flex flex-col items-center">
             <div
               className="w-[240px] h-[240px] rounded-[24px] flex items-center justify-center"
               style={{ backgroundColor: badge.badge_color }}

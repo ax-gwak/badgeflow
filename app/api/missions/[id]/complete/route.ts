@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { registerBadgeOnChain } from "@/lib/blockchain";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  const userId = session?.user?.id || "guest";
+
   const { id } = await params;
 
   const mission = db.prepare("SELECT * FROM missions WHERE id = ?").get(id) as
@@ -17,7 +21,7 @@ export async function POST(
 
   const existing = db
     .prepare("SELECT id FROM earned_badges WHERE mission_id = ? AND user_id = ?")
-    .get(id, "test-user");
+    .get(id, userId);
   if (existing) {
     return NextResponse.json({ error: "Already completed" }, { status: 409 });
   }
@@ -27,10 +31,11 @@ export async function POST(
 
   db.prepare(
     `INSERT INTO earned_badges (id, mission_id, user_id, badge_name, badge_color, badge_icon, category, earned_at)
-     VALUES (?, ?, 'test-user', ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     badgeId,
     id,
+    userId,
     mission.badge_name,
     mission.badge_color,
     mission.badge_icon,
@@ -42,7 +47,7 @@ export async function POST(
   const chainResult = await registerBadgeOnChain({
     id: badgeId,
     mission_id: id,
-    user_id: "test-user",
+    user_id: userId,
     badge_name: mission.badge_name,
     earned_at: earnedAt,
   });

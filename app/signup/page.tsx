@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,6 +19,20 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error || "Sign up failed");
+      setLoading(false);
+      return;
+    }
+
+    // Auto sign in after signup
     const result = await signIn("credentials", {
       email,
       password,
@@ -27,7 +42,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError("Account created but sign in failed. Please try logging in.");
     } else {
       router.push("/dashboard");
       router.refresh();
@@ -48,11 +63,11 @@ export default function LoginPage() {
         <div className="flex-1 flex items-center">
           <div>
             <h1 className="text-[36px] font-primary font-bold leading-tight text-white">
-              Every achievement deserves recognition.
+              Start your badge journey today.
             </h1>
             <p className="text-[16px] text-white/80 font-secondary mt-4">
-              Create, issue, and verify digital badges for your learning
-              community.
+              Create your account and begin earning, issuing, and sharing
+              verified digital badges.
             </p>
           </div>
         </div>
@@ -66,11 +81,13 @@ export default function LoginPage() {
       <div className="w-full md:w-1/2 bg-[var(--card)] flex items-center justify-center p-8 md:p-12 flex-1">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-[400px] flex flex-col gap-6"
+          className="w-full max-w-[400px] flex flex-col gap-5"
         >
-          <h2 className="text-[28px] font-primary font-bold">Welcome back</h2>
-          <p className="text-[14px] text-[var(--muted-foreground)] font-secondary -mt-4">
-            Sign in to your account to continue
+          <h2 className="text-[28px] font-primary font-bold">
+            Create an account
+          </h2>
+          <p className="text-[14px] text-[var(--muted-foreground)] font-secondary -mt-3">
+            Fill in the details below to get started
           </p>
 
           {error && (
@@ -80,6 +97,13 @@ export default function LoginPage() {
           )}
 
           <Input
+            label="Name"
+            placeholder="Your full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <Input
             label="Email"
             placeholder="you@example.com"
             type="email"
@@ -87,19 +111,13 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <div>
-            <Input
-              label="Password"
-              placeholder="Enter your password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="bg-[var(--muted)] rounded-[8px] px-4 py-3 text-[13px] text-[var(--muted-foreground)] font-secondary">
-            <strong>Demo Account:</strong> admin@badgeflow.com / admin1234
-          </div>
+          <Input
+            label="Password"
+            placeholder="At least 6 characters"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           <Button
             variant="default"
@@ -108,16 +126,16 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Creating account..." : "Sign Up"}
           </Button>
 
           <p className="text-[14px] text-[var(--muted-foreground)] font-secondary text-center">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <span
               className="text-[var(--primary)] font-medium cursor-pointer"
-              onClick={() => router.push("/signup")}
+              onClick={() => router.push("/login")}
             >
-              Sign up
+              Sign in
             </span>
           </p>
         </form>

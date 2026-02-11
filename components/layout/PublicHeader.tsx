@@ -8,8 +8,12 @@ export function PublicHeader() {
   const { data: session } = useSession();
   const router = useRouter();
 
+  const profileHref = session?.user?.id
+    ? `/profile/${session.user.id}`
+    : "/login";
+
   return (
-    <header className="w-full h-[64px] border-b border-[var(--border)] px-8 flex items-center justify-between bg-[var(--background)]">
+    <header className="w-full h-[64px] border-b border-[var(--border)] px-4 md:px-8 flex items-center justify-between bg-[var(--background)]">
       <span
         className="text-[var(--primary)] font-primary text-[18px] font-bold cursor-pointer"
         onClick={() => router.push("/")}
@@ -17,9 +21,9 @@ export function PublicHeader() {
         BADGEFLOW
       </span>
 
-      <nav className="flex gap-6">
+      <nav className="hidden sm:flex gap-6">
         <a
-          href="/profile/test-user"
+          href={profileHref}
           className="text-[var(--muted-foreground)] font-secondary text-[14px] hover:text-[var(--foreground)] transition-colors"
         >
           Profile
