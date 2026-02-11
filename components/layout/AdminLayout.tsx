@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeItem: "dashboard" | "badges" | "issuance" | "analytics" | "settings";
+  activeItem: "dashboard" | "badges" | "issuance" | "analytics" | "settings" | "users";
 }
 
 export function AdminLayout({ children, activeItem }: AdminLayoutProps) {

@@ -7,6 +7,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RecentTable } from "@/components/dashboard/RecentTable";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface DashboardData {
   metrics: { title: string; value: string; change: string; icon: string }[];
@@ -21,6 +22,7 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,9 +47,9 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-[24px] font-primary font-bold">Dashboard</h1>
+            <h1 className="text-[24px] font-primary font-bold">{t("dashboard.title")}</h1>
             <p className="text-[14px] text-[var(--muted-foreground)] font-secondary">
-              Overview of your badge platform activity
+              {t("dashboard.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -55,7 +57,7 @@ export default function DashboardPage() {
               variant="default"
               onClick={() => router.push("/badges/create")}
             >
-              + New Badge
+              {t("dashboard.newBadge")}
             </Button>
           </div>
         </div>
@@ -79,20 +81,20 @@ export default function DashboardPage() {
             header={
               <div className="flex justify-between items-center">
                 <span className="text-[18px] font-primary font-bold">
-                  Recent Issuances
+                  {t("dashboard.recentIssuances")}
                 </span>
                 <Button
                   variant="outline"
                   onClick={() => router.push("/badges")}
                 >
-                  View All
+                  {t("dashboard.viewAll")}
                 </Button>
               </div>
             }
           >
             {loading ? (
               <div className="flex items-center justify-center h-[120px] text-[var(--muted-foreground)] font-secondary text-[14px]">
-                Loading...
+                {t("common.loading")}
               </div>
             ) : data?.recentIssuances.length ? (
               <RecentTable data={data.recentIssuances} />

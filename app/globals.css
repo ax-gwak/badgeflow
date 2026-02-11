@@ -37,6 +37,41 @@
   --radius-pill: 999px;
 }
 
+.dark {
+  --background: #111111;
+  --card: #1A1A1A;
+  --foreground: #E7E8E5;
+  --muted: #1A1A1A;
+  --muted-foreground: #999999;
+  --border: #2A2A2A;
+  --input: #2A2A2A;
+  --ring: #999999;
+  --primary: #FF8400;
+  --primary-foreground: #111111;
+  --secondary: #2A2A2A;
+  --secondary-foreground: #E7E8E5;
+  --destructive: #FF4D2A;
+  --accent: #1A1A1A;
+  --accent-foreground: #E7E8E5;
+  --popover: #1A1A1A;
+  --popover-foreground: #E7E8E5;
+  --sidebar: #161616;
+  --sidebar-foreground: #999999;
+  --sidebar-accent: #2A2A2A;
+  --sidebar-accent-foreground: #E7E8E5;
+  --sidebar-border: #2A2A2A;
+  --sidebar-primary: #E7E8E5;
+  --sidebar-primary-foreground: #111111;
+  --color-success: #1A2E1F;
+  --color-success-foreground: #4ADE80;
+  --color-warning: #2E2515;
+  --color-warning-foreground: #FBBF24;
+  --color-error: #2E1A17;
+  --color-error-foreground: #F87171;
+  --color-info: #1A1A2E;
+  --color-info-foreground: #818CF8;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

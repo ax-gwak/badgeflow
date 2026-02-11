@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   const user = db
-    .prepare("SELECT id, name, email, role FROM users WHERE id = ?")
+    .prepare("SELECT id, name, email, role, avatar FROM users WHERE id = ?")
     .get(session.user.id) as Omit<DbUser, "password"> | undefined;
 
   if (!user) {

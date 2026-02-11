@@ -4,8 +4,10 @@ import React from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher";
 
-type ActiveItem = "dashboard" | "badges" | "issuance" | "analytics" | "settings";
+type ActiveItem = "dashboard" | "badges" | "issuance" | "analytics" | "settings" | "users";
 
 interface SidebarProps {
   activeItem: ActiveItem;
@@ -28,6 +30,10 @@ const mainItems: NavItem[] = [
 const insightItems: NavItem[] = [
   { key: "analytics", label: "Analytics", icon: "bar_chart", href: "/analytics" },
   { key: "settings", label: "Settings", icon: "settings", href: "/settings" },
+];
+
+const adminItems: NavItem[] = [
+  { key: "users", label: "User Management", icon: "group", href: "/admin/users" },
 ];
 
 export function Sidebar({ activeItem, onClose }: SidebarProps) {
@@ -86,27 +92,40 @@ export function Sidebar({ activeItem, onClose }: SidebarProps) {
           </div>
           {insightItems.map(renderItem)}
         </div>
+
+        <div className="flex flex-col gap-1 mt-4">
+          <div className="text-[12px] text-[var(--sidebar-foreground)] font-primary uppercase px-6 py-2">
+            Admin
+          </div>
+          {adminItems.map(renderItem)}
+        </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-[var(--sidebar-border)] flex items-center gap-3">
-        <Avatar initials={initials} size="sm" />
-        <div className="flex flex-col flex-1">
-          <span className="text-[14px] font-secondary font-medium text-[var(--sidebar-accent-foreground)]">
-            {userName}
-          </span>
-          <span className="text-[12px] font-secondary text-[var(--sidebar-foreground)]">
-            {userEmail}
-          </span>
+      <div className="px-6 py-4 border-t border-[var(--sidebar-border)] flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar initials={initials} size="sm" />
+          <div className="flex flex-col flex-1">
+            <span className="text-[14px] font-secondary font-medium text-[var(--sidebar-accent-foreground)]">
+              {userName}
+            </span>
+            <span className="text-[12px] font-secondary text-[var(--sidebar-foreground)]">
+              {userEmail}
+            </span>
+          </div>
+          {session && (
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="material-icons text-[18px] text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-accent-foreground)] cursor-pointer transition-colors"
+              title="Sign out"
+            >
+              logout
+            </button>
+          )}
         </div>
-        {session && (
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="material-icons text-[18px] text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-accent-foreground)] cursor-pointer transition-colors"
-            title="Sign out"
-          >
-            logout
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <LocaleSwitcher />
+        </div>
       </div>
     </aside>
   );

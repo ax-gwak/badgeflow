@@ -5,6 +5,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Label } from "@/components/ui/Label";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface AnalyticsData {
   byCategory: { category: string; count: number }[];
@@ -25,6 +26,7 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
+  const { t } = useLocale();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,9 +47,9 @@ export default function AnalyticsPage() {
       <div className="p-4 md:p-8">
         {/* Header */}
         <div>
-          <h1 className="text-[24px] font-primary font-bold">Analytics</h1>
+          <h1 className="text-[24px] font-primary font-bold">{t("analytics.title")}</h1>
           <p className="text-[14px] text-[var(--muted-foreground)] font-secondary">
-            Platform statistics and badge issuance trends
+            {t("analytics.subtitle")}
           </p>
         </div>
 

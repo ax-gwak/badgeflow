@@ -52,8 +52,15 @@ export default function BadgesPage() {
     });
   };
 
-  // Filter by search
+  // Dynamic category tabs
+  const categories = ["All Badges", ...Array.from(new Set(badges.map((b) => b.category)))];
+  const activeCategory = categories[activeTab] || "All Badges";
+
+  // Filter by tab + search
   const filtered = badges.filter((b) => {
+    // Category tab filter
+    if (activeCategory !== "All Badges" && b.category !== activeCategory) return false;
+    // Search filter
     const q = searchValue.toLowerCase();
     return (
       b.badge_name.toLowerCase().includes(q) ||
@@ -81,9 +88,9 @@ export default function BadgesPage() {
         {/* Tabs & Search */}
         <div className="flex items-center justify-between mt-6 gap-4">
           <Tabs
-            items={["All Badges", "시험 인증", "학습 활동", "책읽기 활동"]}
+            items={categories}
             activeIndex={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={(i) => setActiveTab(i)}
           />
           <SearchBox
             placeholder="Search..."

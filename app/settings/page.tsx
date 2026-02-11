@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function SettingsPage() {
+  const { t } = useLocale();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
@@ -15,6 +17,9 @@ export default function SettingsPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -32,6 +37,7 @@ export default function SettingsPage() {
         setName(d.name ?? "");
         setEmail(d.email ?? "");
         setRole(d.role ?? "");
+        setAvatar(d.avatar ?? null);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -100,9 +106,9 @@ export default function SettingsPage() {
       <div className="p-4 md:p-8 max-w-[700px]">
         {/* Header */}
         <div>
-          <h1 className="text-[24px] font-primary font-bold">Settings</h1>
+          <h1 className="text-[24px] font-primary font-bold">{t("settings.title")}</h1>
           <p className="text-[14px] text-[var(--muted-foreground)] font-secondary">
-            Manage your account and preferences
+            {t("settings.subtitle")}
           </p>
         </div>
 
@@ -112,6 +118,73 @@ export default function SettingsPage() {
           </div>
         ) : (
           <>
+            {/* Avatar Section */}
+            <div className="mt-6">
+              <Card
+                header={
+                  <span className="text-[16px] font-primary font-bold">
+                    Avatar
+                  </span>
+                }
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-[64px] h-[64px] rounded-full bg-[var(--secondary)] flex items-center justify-center overflow-hidden shrink-0 border border-[var(--border)]">
+                    {avatar ? (
+                      <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="material-icons text-[28px] text-[var(--muted-foreground)]">
+                        person
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setAvatarUploading(true);
+                          const form = new FormData();
+                          form.append("avatar", file);
+                          try {
+                            const res = await fetch("/api/avatar", {
+                              method: "POST",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (res.ok) setAvatar(data.avatar + "?t=" + Date.now());
+                          } catch {}
+                          setAvatarUploading(false);
+                          e.target.value = "";
+                        }}
+                      />
+                      <span className="inline-flex items-center gap-1 text-[13px] font-secondary text-[var(--primary)] hover:underline">
+                        <span className="material-icons text-[16px]">upload</span>
+                        {avatarUploading ? "Uploading..." : "Upload image"}
+                      </span>
+                    </label>
+                    {avatar && (
+                      <button
+                        className="text-[13px] font-secondary text-[var(--destructive)] hover:underline text-left cursor-pointer"
+                        onClick={async () => {
+                          await fetch("/api/avatar", { method: "DELETE" });
+                          setAvatar(null);
+                        }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <p className="text-[11px] text-[var(--muted-foreground)] font-secondary">
+                      Max 2MB. JPG, PNG, or GIF.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
             {/* Profile Section */}
             <div className="mt-6">
               <Card

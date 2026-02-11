@@ -1,0 +1,21 @@
+{
+  "name": "BadgeFlow - Digital Badge Platform",
+  "short_name": "BadgeFlow",
+  "description": "Create, issue, and manage digital badges for learning achievements",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F3F0",
+  "theme_color": "#FF8400",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

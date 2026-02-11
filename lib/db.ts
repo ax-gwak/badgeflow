@@ -53,6 +53,15 @@ function initDb(): Database.Database {
     );
   `);
 
+  // Migrate: add avatar column if it doesn't exist
+  const userColumns = db
+    .prepare("PRAGMA table_info(users)")
+    .all() as { name: string }[];
+  const userColumnNames = userColumns.map((c) => c.name);
+  if (!userColumnNames.includes("avatar")) {
+    db.exec("ALTER TABLE users ADD COLUMN avatar TEXT");
+  }
+
   // Migrate: add blockchain columns if they don't exist
   const columns = db
     .prepare("PRAGMA table_info(earned_badges)")
