@@ -10,6 +10,7 @@ export default function TestPage() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -54,14 +55,32 @@ export default function TestPage() {
       <div className="flex-1 overflow-auto">
         <div className="max-w-[1000px] mx-auto p-8">
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-[28px] font-primary font-bold">
-              Mission Test Page
-            </h1>
-            <p className="text-[14px] text-[var(--muted-foreground)] font-secondary mt-1">
-              미션을 완료하면 뱃지가 자동으로 발급됩니다. 발급된 뱃지는 외부에
-              공유할 수 있습니다.
-            </p>
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1 className="text-[28px] font-primary font-bold">
+                Mission Test Page
+              </h1>
+              <p className="text-[14px] text-[var(--muted-foreground)] font-secondary mt-1">
+                미션을 완료하면 뱃지가 자동으로 발급됩니다. 발급된 뱃지는 외부에
+                공유할 수 있습니다.
+              </p>
+            </div>
+            {earnedBadges.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!confirm("완료 기록을 모두 초기화할까요? 미션은 그대로 유지됩니다.")) return;
+                  setResetting(true);
+                  await fetch("/api/reset", { method: "POST" });
+                  await fetchData();
+                  setResetting(false);
+                }}
+                disabled={resetting}
+              >
+                <span className="material-icons text-[16px]">restart_alt</span>
+                {resetting ? "초기화 중..." : "초기화"}
+              </Button>
+            )}
           </div>
 
           {/* Section 1: Missions */}

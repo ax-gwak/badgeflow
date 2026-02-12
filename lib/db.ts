@@ -92,8 +92,11 @@ function initDb(): Database.Database {
   // Seed default admin user
   const hashedPassword = bcrypt.hashSync("admin1234", 10);
   db.prepare(
-    "INSERT OR IGNORE INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)"
-  ).run("admin-1", "Admin User", "admin@badgeflow.com", hashedPassword, "admin");
+    "INSERT OR IGNORE INTO users (id, name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run("admin-1", "Admin User", "admin@badgeflow.com", hashedPassword, "admin", "/avatars/admin-1.svg");
+
+  // Update avatar if admin exists but has no avatar
+  db.prepare("UPDATE users SET avatar = ? WHERE id = ? AND avatar IS NULL").run("/avatars/admin-1.svg", "admin-1");
 
   (globalThis as Record<string, unknown>).__db = db;
   return db;

@@ -47,8 +47,9 @@ next-env.d.ts
 /data/*.db-shm
 /data/contract-deployment.json
 
-# Uploaded avatars
-/public/avatars/
+# Uploaded avatars (keep default SVGs)
+/public/avatars/*
+!/public/avatars/*.svg
 
 # Hardhat
 /artifacts/
