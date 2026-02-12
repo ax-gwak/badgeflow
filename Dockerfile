@@ -5,7 +5,7 @@ FROM base AS deps
 RUN apk add --no-cache python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Build the app
 FROM base AS builder
@@ -14,6 +14,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV AUTH_SECRET=build-time-placeholder
 RUN npm run build
 
 # Production runner
